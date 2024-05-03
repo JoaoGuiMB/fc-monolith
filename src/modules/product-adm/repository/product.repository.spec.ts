@@ -47,4 +47,24 @@ describe("ProductRepository test", () => {
     expect(productDb.createdAt).toBeDefined();
     expect(productDb.updatedAt).toBeDefined();
   });
+
+  it("should find a product", async () => {
+    const productRepository = new ProductRepository();
+
+    ProductModel.create({
+      id: "1",
+      name: "Product 1",
+      description: "Description 1",
+      purchasePrice: 100,
+      stock: 10,
+    });
+
+    const product = await productRepository.find("1");
+
+    expect(product.id.id).toBe("1");
+    expect(product.name).toBe("Product 1");
+    expect(product.description).toBe("Description 1");
+    expect(product.purchasePrice).toBe(100);
+    expect(product.stock).toBe(10);
+  });
 });
