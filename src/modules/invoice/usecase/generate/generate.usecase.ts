@@ -1,4 +1,5 @@
 import Address from "../../../@shared/domain/value-object/address.value-object";
+import Id from "../../../@shared/domain/value-object/id.value-object.interface";
 import Invoice from "../../domain/invoice";
 import InvoiceItem from "../../domain/invoice-items";
 import InvoiceGateway from "../../gateway/invoice.gateway";
@@ -31,7 +32,11 @@ export default class GenerateInvoiceUseCase {
       document: input.document,
       address,
       items: input.items.map((item) => {
-        return new InvoiceItem({ ...item });
+        return new InvoiceItem({
+          id: new Id(item.id),
+          name: item.name,
+          price: item.price,
+        });
       }),
     });
 

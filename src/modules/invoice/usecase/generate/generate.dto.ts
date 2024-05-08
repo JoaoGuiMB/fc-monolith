@@ -9,6 +9,7 @@ export interface GenerateInvoiceUseCaseInputDto {
   state: string;
   zipCode: string;
   items: {
+    id: string;
     name: string;
     price: number;
   }[];

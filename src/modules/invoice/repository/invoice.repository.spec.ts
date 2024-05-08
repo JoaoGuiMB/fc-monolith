@@ -94,5 +94,6 @@ describe("InvoiceRepository test", () => {
     expect(invoice.name).toBe("Invoice 1");
     expect(invoice.items.length).toBe(1);
     expect(invoice.items[0].id).toEqual(new Id("1"));
+    expect(invoice.items[0].name).toBe("Item 1");
   });
 });

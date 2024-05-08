@@ -63,7 +63,8 @@ export default class InvoiceRepository implements InvoiceGateway {
 
     const items = invoice.items.map((item) => {
       return new InvoiceItem({
-        ...item,
+        name: item.name,
+        price: item.price,
         id: new Id(item.id),
         invoiceId: new Id(item.invoiceId),
       });

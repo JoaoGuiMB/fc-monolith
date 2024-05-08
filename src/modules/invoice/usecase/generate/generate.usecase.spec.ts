@@ -23,6 +23,7 @@ describe("GenerateInvoiceUsecase unit test", () => {
       zipCode: "123456",
       items: [
         {
+          id: "1",
           name: "Item 1",
           price: 100,
         },
