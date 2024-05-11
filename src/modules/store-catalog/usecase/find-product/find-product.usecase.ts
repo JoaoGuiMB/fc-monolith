@@ -8,7 +8,7 @@ export default class FindProduct implements UseCaseInterface {
     const product = await this._productRepository.find(id);
 
     return {
-      id: product.id,
+      id: product.id.id,
       name: product.name,
       description: product.description,
       salesPrice: product.salesPrice,

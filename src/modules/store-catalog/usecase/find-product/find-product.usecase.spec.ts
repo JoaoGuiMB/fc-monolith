@@ -23,7 +23,7 @@ describe("Find product usecase unit  test", () => {
     const product = await usecase.execute("1");
 
     expect(repository.find).toBeCalledWith("1");
-    expect(product.id.id).toBe("1");
+    expect(product.id).toBe("1");
     expect(product.name).toBe("Product 1");
   });
 });

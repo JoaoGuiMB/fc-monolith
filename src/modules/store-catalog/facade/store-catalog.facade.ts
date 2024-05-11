@@ -1,17 +1,17 @@
-import FindAllProductsUseCase from "../usecase/find-all-products/find.all-products.usecase";
-import FindProduct from "../usecase/find-product/find-product.usecase";
+import UseCaseInterface from "../../@shared/usecase/use-case.interface";
 import StoreCatalogFacadeInterface, {
   FindStoreCatalogFacadeInputDto,
 } from "./store-catalog.facade.interface";
 
 export interface UseCaseProps {
-  findUsecase: FindProduct;
-  findAllUsecase: FindAllProductsUseCase;
+  findUsecase: UseCaseInterface;
+  findAllUsecase: UseCaseInterface;
 }
 
 export default class StoreCatalogFacade implements StoreCatalogFacadeInterface {
-  private _findUsecase: FindProduct;
-  private _findAllUsecase: FindAllProductsUseCase;
+  private _findUsecase: UseCaseInterface;
+  private _findAllUsecase: UseCaseInterface;
+
   constructor(props: UseCaseProps) {
     this._findUsecase = props.findUsecase;
     this._findAllUsecase = props.findAllUsecase;

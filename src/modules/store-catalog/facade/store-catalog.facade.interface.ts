@@ -1,11 +1,9 @@
-import Id from "../../@shared/domain/value-object/id.value-object.interface";
-
 export interface FindStoreCatalogFacadeInputDto {
   id: string;
 }
 
 export interface FindStoreCatalogFacadeOutputDto {
-  id: Id;
+  id: string;
   name: string;
   description: string;
   salesPrice: number;
