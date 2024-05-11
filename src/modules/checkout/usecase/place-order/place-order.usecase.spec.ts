@@ -126,7 +126,7 @@ describe("PlaceOrderUsecase unit test", () => {
       };
 
       //@ts-expect-error - no params in contructor
-      const placeOrderUseCase = new PlaceOrderUseCase(mockClientFacade);
+      const placeOrderUseCase = new PlaceOrderUseCase();
 
       //@ts-expect-error - force set clientFacade
       placeOrderUseCase["_clientFacade"] = mockClientFacade;
@@ -164,6 +164,183 @@ describe("PlaceOrderUsecase unit test", () => {
         "No products selected"
       );
       expect(mockValidateProducts).toHaveBeenCalledTimes(1);
+    });
+
+    describe("place an order", () => {
+      const clientProps = {
+        id: "1",
+        name: "Client",
+        address: "Address",
+        email: "asd@email.com",
+        document: "123456789",
+        street: "Street",
+        number: 1,
+        city: "City",
+        state: "State",
+        zipCode: "123456",
+        complement: "Complement",
+      };
+
+      const mockClientFacade = {
+        find: jest.fn().mockResolvedValue(clientProps),
+        add: jest.fn(),
+      };
+
+      const mockPaymentFacade = {
+        process: jest.fn(),
+      };
+
+      const mockCheckoutRepository = {
+        findOrder: jest.fn(),
+        addOrder: jest.fn(),
+      };
+
+      const mockInvoiceFacade = {
+        find: jest.fn(),
+        generate: jest.fn().mockResolvedValue({
+          id: "1",
+        }),
+      };
+
+      const placeOrderUseCase = new PlaceOrderUseCase(
+        mockClientFacade,
+        null,
+        null,
+        mockCheckoutRepository as any,
+        mockInvoiceFacade as any,
+        mockPaymentFacade as any
+      );
+
+      const products = {
+        "1": new Product({
+          id: new Id("1"),
+          name: "Product 1",
+          description: "Description",
+          salesPrice: 50,
+        }),
+        "2": new Product({
+          id: new Id("2"),
+          name: "Product 2",
+          description: "Description",
+          salesPrice: 20,
+        }),
+      };
+
+      const mockValidateProducts = jest
+        //@ts-expect-error - spy on private method
+        .spyOn(placeOrderUseCase, "validateProducts")
+        //@ts-expect-error - spy on private method
+        .mockResolvedValue(null);
+
+      const mockGetProduct = jest
+        //@ts-expect-error - spy on private method
+        .spyOn(placeOrderUseCase, "getProduct")
+        //@ts-expect-error - not return never
+        .mockImplementation((id: keyof typeof products) => {
+          return products[id];
+        });
+
+      it("should not be approved", async () => {
+        mockPaymentFacade.process = mockPaymentFacade.process.mockReturnValue({
+          transactionId: "1t",
+          orderId: "1o",
+          amout: 100,
+          status: "error",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        const input: PlaceOrderInputDto = {
+          clientId: "1c",
+          products: [{ productId: "1" }, { productId: "2" }],
+        };
+
+        let output = await placeOrderUseCase.execute(input);
+        expect(output.invoiceId).toBe(null);
+
+        expect(output.total).toBe(70);
+        expect(output.products).toStrictEqual([
+          {
+            productId: "1",
+          },
+          {
+            productId: "2",
+          },
+        ]);
+        expect(mockClientFacade.find).toHaveBeenCalledTimes(1);
+        expect(mockClientFacade.find).toHaveBeenCalledWith({ id: "1c" });
+        expect(mockValidateProducts).toHaveBeenCalledWith(input);
+        expect(mockGetProduct).toHaveBeenCalledTimes(2);
+        expect(mockCheckoutRepository.addOrder).toHaveBeenCalledTimes(1);
+        expect(mockPaymentFacade.process).toHaveBeenCalledTimes(1);
+        expect(mockPaymentFacade.process).toHaveBeenCalledWith({
+          orderId: output.id,
+          amount: output.total,
+        });
+        expect(mockInvoiceFacade.generate).toHaveBeenCalledTimes(0);
+      });
+
+      it("should be approved", async () => {
+        mockPaymentFacade.process = mockPaymentFacade.process.mockReturnValue({
+          transactionId: "1t",
+          orderId: "1o",
+          amout: 100,
+          status: "approved",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        const input: PlaceOrderInputDto = {
+          clientId: "1c",
+          products: [{ productId: "1" }, { productId: "2" }],
+        };
+
+        let output = await placeOrderUseCase.execute(input);
+        expect(output.invoiceId).toBe("1");
+
+        expect(output.total).toBe(70);
+        expect(output.products).toStrictEqual([
+          {
+            productId: "1",
+          },
+          {
+            productId: "2",
+          },
+        ]);
+        expect(mockClientFacade.find).toHaveBeenCalledTimes(1);
+        expect(mockClientFacade.find).toHaveBeenCalledWith({ id: "1c" });
+        expect(mockValidateProducts).toHaveBeenCalledWith(input);
+        expect(mockGetProduct).toHaveBeenCalledTimes(2);
+        expect(mockCheckoutRepository.addOrder).toHaveBeenCalledTimes(1);
+        expect(mockPaymentFacade.process).toHaveBeenCalledTimes(1);
+        expect(mockPaymentFacade.process).toHaveBeenCalledWith({
+          orderId: output.id,
+          amount: output.total,
+        });
+        expect(mockInvoiceFacade.generate).toHaveBeenCalledTimes(1);
+        expect(mockInvoiceFacade.generate).toHaveBeenCalledWith({
+          name: clientProps.name,
+          document: clientProps.address,
+          state: clientProps.address,
+          city: clientProps.address,
+          zipCode: clientProps.address,
+          street: clientProps.address,
+          complement: clientProps.address,
+          number: clientProps.number,
+          items: [
+            {
+              id: products["1"].id.id,
+              name: products["1"].name,
+              price: products["1"].salesPrice,
+            },
+            {
+              id: products["2"].id.id,
+              name: products["2"].name,
+              price: products["2"].salesPrice,
+            },
+          ],
+        });
+      });
     });
   });
 });
