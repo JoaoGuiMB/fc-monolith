@@ -9,7 +9,7 @@ import {
 } from "sequelize-typescript";
 
 @Table({
-  tableName: "order_items",
+  tableName: "invoice_items",
   timestamps: false,
 })
 export default class InvoiceItemModel extends Model {
